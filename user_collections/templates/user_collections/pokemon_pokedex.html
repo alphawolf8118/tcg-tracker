@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Pokémon Pokédex</h1>
+<div class="max-w-4xl mx-auto mb-6">
+    <div class="flex justify-between items-center mb-2">
+        <h2 class="text-lg">Collection Progress</h2>
+        <p class="text-sm">{{ collected_count }}/{{ total_pokemon }} Pokémon Collected ({{ progress|floatformat:0 }}%)</p>
+    </div>
+    <progress class="progress progress-success w-full" value="{{ progress }}" max="100"></progress>
+</div>
+<form method="get" class="mb-6 max-w-md mx-auto">
+    <div class="mb-4">
+        <a href="{% url 'user_collections:export_missing_pokemon' %}" class="btn btn-secondary">
+        Export Missing Pokémon (CSV)
+        </a>
+    </div>
+    <div class="input-group">
+        <input type="text" name="q" class="input input-bordered w-full" placeholder="Search Pokémon by name or dex number" value="{{ query }}">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+</form>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-w-7xl mx-auto">
+    {% for pokemon in pokemon_list %}
+        <div id="pokemon-{{ pokemon.id }}" class="card bg-base-100 shadow-xl {% if pokemon.collected %}bg-success/50{% endif %}">
+            <div class="card-body items-center text-center">
+                <div class="text-sm font-bold text-gray-600 mb-2">#{{ pokemon.dex_number }}</div>
+                {% if pokemon.image_url %}
+                    <img src="{{ pokemon.image_url }}" alt="{{ pokemon.name }}" class="w-24 h-24 object-contain rounded mb-2">
+                {% endif %}
+                <h3 class="card-title text-lg">{{ pokemon.name }}</h3>
+                <form method="post" action="{% url 'user_collections:pokemon_pokedex' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="pokemon_id" value="{{ pokemon.id }}">
+                    <input type="hidden" name="page" value="{{ pokemon_list.number|default:'1' }}">
+                    <input type="hidden" name="query" value="{{ query|default:'' }}">
+                    <label class="flex items-center gap-2 justify-center">
+                        <input type="checkbox" name="collected" class="checkbox checkbox-primary"
+                               {% if pokemon.collected %}checked{% endif %}>
+                        <span class="text-sm">Collected</span>
+                    </label>
+                    <button type="submit" class="btn btn-primary btn-sm mt-2">Save</button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+<div class="mt-6 flex justify-center">
+    <div class="join">
+        {% if pokemon_list.has_previous %}
+            <a href="?page={{ pokemon_list.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="join-item btn">Previous</a>
+        {% endif %}
+        <span class="join-item btn btn-disabled">Page {{ pokemon_list.number }} of {{ pokemon_list.paginator.num_pages }}</span>
+        {% if pokemon_list.has_next %}
+            <a href="?page={{ pokemon_list.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="join-item btn">Next</a>
+        {% endif %}
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hash = window.location.hash; // e.g., #pokemon-101
+    console.log('Hash:', hash); // Debug
+    if (hash) {
+        const element = document.querySelector(hash);
+        if (element) {
+            console.log('Scrolling to:', hash); // Debug
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            console.log('Element not found:', hash); // Debug
+        }
+    }
+});
+</script>
+{% endblock %}

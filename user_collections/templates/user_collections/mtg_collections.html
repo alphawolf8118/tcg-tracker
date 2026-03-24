@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-3xl font-bold">Magic: The Gathering Collections</h1>
+        <form method="post" action="{% url 'user_collections:mtg_collections' %}" class="flex items-center gap-2">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_binder">
+            <input type="text" name="binder_name" placeholder="New Binder Name" class="input input-bordered w-64" required>
+            <button type="submit" class="btn btn-primary">Create Binder</button>
+        </form>
+    </div>
+    <!-- Removed the main export button as requested -->
+    <div class="mt-8 block">
+        <div class="dropdown">
+            <label tabindex="0" class="btn btn-outline">Select Set or Binder</label>
+            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-64 z-10">
+                {% for item in items %}
+                    {% if item.type == 'binder' %}
+                        <li>
+                            <span class="font-bold">{{ item.binder.name }}</span>
+                            <ul class="ml-4">
+                                {% for set in item.sets %}
+                                    <li>
+                                        {% if set.symbol_url %}
+                                            <img src="{{ set.symbol_url }}" alt="{{ set.name }} symbol" class="inline-block w-6 h-6 mr-2">
+                                        {% endif %}
+                                        <a href="{% url 'user_collections:mtg_set_detail' set.id %}?export=cards" class="link link-hover">{{ set.name }} ({{ set.code }})</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li>
+                            {% if item.set.symbol_url %}
+                                <img src="{{ item.set.symbol_url }}" alt="{{ item.set.name }} symbol" class="inline-block w-6 h-6 mr-2">
+                            {% endif %}
+                            <a href="{% url 'user_collections:mtg_set_detail' item.set.id %}?export=cards" class="link link-hover">{{ item.set.name }} ({{ item.set.code }})</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% if error %}
+        <div class="alert alert-error mb-4">
+            <span>{{ error }}</span>
+        </div>
+    {% endif %}
+    <div class="space-y-4">
+        {% for item in items %}
+            {% if item.type == 'binder' %}
+                <div class="collapse collapse-arrow border border-base-300 bg-purple-200 dark:bg-purple-700 rounded-box">
+                    <input type="checkbox">
+                    <div class="collapse-title text-xl font-medium">
+                        {{ item.binder.name }}
+                    </div>
+                    <div class="collapse-content">
+                        <div class="flex justify-end mb-2">
+                            <form method="post" action="{% url 'user_collections:delete_binder' item.binder.id %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-error btn-sm" onclick="return confirm('Are you sure you want to delete {{ item.binder.name }}? This will remove all sets in this binder.');">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                        <div class="space-y-4">
+                            {% for set in item.sets %}
+                                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow ml-4">
+                                    <div class="card-body">
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex items-center gap-2">
+                                                <h3 class="card-title">
+                                                    {% if set.symbol_url %}
+                                                        <img src="{{ set.symbol_url }}" alt="{{ set.name }} symbol" class="inline-block w-6 h-6 mr-2">
+                                                    {% endif %}
+                                                    <a href="{% url 'user_collections:mtg_set_detail' set.id %}?export=cards" class="link link-hover">{{ set.name }} ({{ set.code }})</a>
+                                                </h3>
+                                            </div>
+                                            <div class="w-1/3">
+                                                <p class="text-sm text-right">{{ set.collected_count }}/{{ set.card_count }} Cards Collected ({{ set.progress|floatformat:0 }}%)</p>
+                                                <progress class="progress progress-success w-full" value="{{ set.progress }}" max="100"></progress>
+                                                <form method="post" action="{% url 'user_collections:delete_set' set.id %}" class="inline ml-2">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-error btn-xs" onclick="return confirm('Are you sure you want to delete {{ set.name }}? This will remove it from all binders.');">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <form method="post" action="{% url 'user_collections:mtg_collections' %}" class="mt-2">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="add_set_to_binder">
+                                            <input type="hidden" name="set_id" value="{{ set.id }}">
+                                            <div class="flex items-center gap-2">
+                                                <select name="binder_id" class="select select-bordered" required>
+                                                    <option value="" disabled selected>Add to Binder</option>
+                                                    {% for binder in binders %}
+                                                        <option value="{{ binder.id }}">{{ binder.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <button type="submit" class="btn btn-primary">Add</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+                    <div class="card-body">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <h3 class="card-title">
+                                    {% if item.set.symbol_url %}
+                                        <img src="{{ item.set.symbol_url }}" alt="{{ item.set.name }} symbol" class="inline-block w-6 h-6 mr-2">
+                                    {% endif %}
+                                    <a href="{% url 'user_collections:mtg_set_detail' item.set.id %}?export=cards" class="link link-hover">{{ item.set.name }} ({{ item.set.code }})</a>
+                                </h3>
+                            </div>
+                            <div class="w-1/3">
+                                <p class="text-sm text-right">{{ item.set.collected_count }}/{{ item.set.card_count }} Cards Collected ({{ item.set.progress|floatformat:0 }}%)</p>
+                                <progress class="progress progress-success w-full" value="{{ item.set.progress }}" max="100"></progress>
+                                <form method="post" action="{% url 'user_collections:delete_set' item.set.id %}" class="inline ml-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-error btn-xs" onclick="return confirm('Are you sure you want to delete {{ item.set.name }}? This will remove it from all binders.');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <form method="post" action="{% url 'user_collections:mtg_collections' %}" class="mt-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="add_set_to_binder">
+                            <input type="hidden" name="set_id" value="{{ item.set.id }}">
+                            <div class="flex items-center gap-2">
+                                <select name="binder_id" class="select select-bordered" required>
+                                    <option value="" disabled selected>Add to Binder</option>
+                                    {% for binder in binders %}
+                                        <option value="{{ binder.id }}">{{ binder.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-primary">Add</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        <!-- Bulk Add Form -->
+        <form method="post" id="bulk-add-form" class="mt-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="bulk_add_sets_to_binder">
+            <div class="flex items-center gap-2">
+                <select name="binder_id" class="select select-bordered" required>
+                    <option value="" disabled selected>Select Binder</option>
+                    {% for binder in binders %}
+                        <option value="{{ binder.id }}">{{ binder.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">Add Selected Sets</button>
+            </div>
+        </form>
+        <!-- Pagination Section -->
+        {% if items.has_other_pages %}
+            <div class="join mt-4">
+                {% if items.has_previous %}
+                    <a href="?page={{ items.previous_page_number }}" class="join-item btn">Previous</a>
+                {% endif %}
+                {% for num in items.paginator.page_range %}
+                    <a href="?page={{ num }}" class="join-item btn {% if items.number == num %}btn-active{% endif %}">{{ num }}</a>
+                {% endfor %}
+                {% if items.has_next %}
+                    <a href="?page={{ items.next_page_number }}" class="join-item btn">Next</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

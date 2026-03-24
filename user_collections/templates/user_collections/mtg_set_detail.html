@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mb-4">
+    <div class="flex justify-between items-center">
+        <h1 class="text-3xl font-bold">{{ set.name }}</h1>
+        <div>
+            <a href="{% url 'user_collections:mtg_collections' %}" class="btn btn-outline mr-2">Back to Collections</a>
+            <a href="{% url 'user_collections:export_missing_cards' set.id %}" class="btn btn-secondary">Export Missing Cards (CSV)</a>
+        </div>
+    </div>
+</div>
+<div class="max-w-4xl mx-auto mb-6">
+    <div class="flex justify-between items-center mb-2">
+        <h2 class="text-lg">Collection Progress</h2>
+        <p class="text-sm">{{ collected_count }}/{{ total_cards }} Cards Collected ({{ progress|floatformat:0 }}%)</p>
+    </div>
+    <progress class="progress progress-success w-full" value="{{ progress }}" max="100"></progress>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+    {% for card in cards %}
+        <div id="card-{{ card.id }}" class="card bg-base-100 shadow-xl {% if card.collected or card.is_foil %}bg-success/50{% endif %}">
+            <div class="card-body">
+                {% if card.image_url %}
+                    <img src="{{ card.image_url }}" alt="{{ card.name }}" class="w-full h-48 object-contain rounded">
+                {% endif %}
+                <h3 class="card-title text-lg text-gray-600">{{ card.name }} ({{ card.collector_number }})</h3>
+                <form method="post" action="{% url 'user_collections:mtg_set_detail' set.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="card_id" value="{{ card.id }}">
+                    <input type="hidden" name="page" value="{{ cards.number|default:'1' }}">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="collected" class="checkbox checkbox-primary"
+                               {% if card.collected %}checked{% endif %}>
+                        <span class="text-black">Non-foil</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="foil" class="checkbox checkbox-primary"
+                               {% if card.is_foil %}checked{% endif %}>
+                        <span class="text-black">Foil</span>
+                    </label>
+                    <button type="submit" class="btn btn-primary mt-2">Save</button>
+                </form>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+<div class="mt-6 flex justify-center">
+    <div class="join">
+        {% if cards.has_previous %}
+            <a href="?page={{ cards.previous_page_number }}" class="join-item btn">Previous</a>
+        {% endif %}
+        <span class="join-item btn btn-disabled">Page {{ cards.number }} of {{ cards.paginator.num_pages }}</span>
+        {% if cards.has_next %}
+            <a href="?page={{ cards.next_page_number }}" class="join-item btn">Next</a>
+        {% endif %}
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hash = window.location.hash; // e.g., #card-123
+    console.log('Hash:', hash); // Debug
+    if (hash) {
+        const element = document.querySelector(hash);
+        if (element) {
+            console.log('Scrolling to:', hash); // Debug
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            console.log('Element not found:', hash); // Debug
+        }
+    }
+});
+</script>
+{% endblock %}

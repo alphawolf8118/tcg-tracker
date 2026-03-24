@@ -1,0 +1,21 @@
+# Ignore SQLite databases
+*.sqlite
+*.sqpro
+*.sqbpro
+
+# Python
+__pycache__/
+*.pyc
+
+# SQLite databases
+*.db
+*.sqlite3
+
+# Django stuff
+/media/
+staticfiles/
+*.log
+
+# Virtual environments
+venv/
+.env/

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6 text-center">Your TCG Dashboard</h1>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+    {% for game in tcg_list %}
+        <a href="{{ game.url }}"
+           class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
+            <div class="card-body">
+                <h2 class="card-title">{{ game.name }}</h2>
+                <p>Manage your {{ game.name }} collection</p>
+            </div>
+        </a>
+    {% endfor %}
+</div>
+{% endblock %}

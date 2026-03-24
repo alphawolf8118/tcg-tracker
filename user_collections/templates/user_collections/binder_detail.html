@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6">Magic: The Gathering Collections</h1>
+<div class="max-w-4xl mx-auto mb-4">
+    <div class="flex justify-between items-center gap-4">
+        <div class="dropdown">
+            <label tabindex="0" class="btn btn-outline">Select Set or Binder</label>
+            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-64">
+                {% for binder_id, data in binder_dict.items %}
+                    {% if data.binder %}
+                        <li>
+                            <span class="font-bold">{{ data.binder.name }}</span>
+                            <ul class="ml-4">
+                                {% for set in data.sets %}
+                                    <li><a href="{% url 'user_collections:mtg_set_detail' set.id %}">{{ set.name }} ({{ set.code }})</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% else %}
+                        {% for set in data.sets %}
+                            <li><a href="{% url 'user_collections:mtg_set_detail' set.id %}">{{ set.name }} ({{ set.code }})</a></li>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <form method="post" action="{% url 'user_collections:mtg_collections' %}" class="flex items-center gap-2">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create_binder">
+            <input type="text" name="binder_name" placeholder="New Binder Name" class="input input-bordered w-64" required>
+            <button type="submit" class="btn btn-primary">Create Binder</button>
+        </form>
+    </div>
+    {% if error %}
+        <div class="alert alert-error mt-2">
+            <span>{{ error }}</span>
+        </div>
+    {% endif %}
+</div>
+<div class="space-y-4 max-w-4xl mx-auto">
+    {% for binder_id, data in binder_dict.items %}
+        {% if data.binder %}
+            <h2 class="text-2xl font-bold mt-6">{{ data.binder.name }}</h2>
+        {% endif %}
+        <div class="space-y-4">
+            {% for set in data.sets %}
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow {% if data.binder %}ml-4{% endif %}">
+                    <div class="card-body">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="card-title">
+                                    <a href="{% url 'user_collections:mtg_set_detail' set.id %}" class="link link-hover">{{ set.name }} ({{ set.code }})</a>
+                                </h3>
+                                <p class="text-sm">Released: {{ set.release_date }} | Cards: {{ set.card_count }}</p>
+                            </div>
+                            <div class="w-1/3">
+                                <p class="text-sm text-right">{{ set.collected_count }}/{{ set.card_count }} Cards Collected ({{ set.progress|floatformat:0 }}%)</p>
+                                <progress class="progress progress-success w-full" value="{{ set.progress }}" max="100"></progress>
+                            </div>
+                        </div>
+                        <form method="post" action="{% url 'user_collections:mtg_collections' %}" class="mt-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="add_set_to_binder">
+                            <input type="hidden" name="set_id" value="{{ set.id }}">
+                            <div class="flex items-center gap-2">
+                                <select name="binder_id" class="select select-bordered" required>
+                                    <option value="" disabled selected>Add to Binder</option>
+                                    {% for binder in binders %}
+                                        <option value="{{ binder.id }}">{{ binder.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-primary">Add</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                {% if data.binder %}
+                    <p class="text-gray-500 ml-4">No sets in this binder.</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
