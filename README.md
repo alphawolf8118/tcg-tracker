@@ -89,8 +89,11 @@ This structure is intentionally modular and ready for additional TCGs.
 Code:
 
 pip install -r requirements.txt
+
 python manage.py migrate
+
 python manage.py runserver
+
 
 📄 License
 MIT License — see LICENSE.
