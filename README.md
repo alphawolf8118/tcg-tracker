@@ -85,6 +85,7 @@ Architecture Summary
 This structure is intentionally modular and ready for additional TCGs.
 
 🚀 Running the Project
+
 Code:
 
 pip install -r requirements.txt
