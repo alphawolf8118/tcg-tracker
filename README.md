@@ -44,6 +44,7 @@ Code:
 
 python manage.py fetch_data
 
+
 Running this command updates the database with new MTG releases (e.g., Universes Beyond sets like Spider‑Man or TMNT).
 The project does not auto‑sync — updates occur whenever this command is run.
 
@@ -93,6 +94,7 @@ pip install -r requirements.txt
 python manage.py migrate
 
 python manage.py runserver
+
 
 
 📄 License
