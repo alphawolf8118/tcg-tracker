@@ -41,9 +41,9 @@ The project also serves as a way to practice:
 MTG set and card data is fetched from an external API using a custom Django management command:
 
 Code: 
-
+```
 python manage.py fetch_data
-
+```
 
 Running this command updates the database with new MTG releases (e.g., Universes Beyond sets like Spider‑Man or TMNT).
 The project does not auto‑sync — updates occur whenever this command is run.
@@ -88,13 +88,11 @@ This structure is intentionally modular and ready for additional TCGs.
 🚀 Running the Project
 
 Code:
-
+```
 pip install -r requirements.txt
-
 python manage.py migrate
-
 python manage.py runserver
-
+```
 
 
 📄 License
