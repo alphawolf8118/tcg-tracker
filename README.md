@@ -40,7 +40,8 @@ The project also serves as a way to practice:
 🔄 MTG Data Sync (Manual Trigger)
 MTG set and card data is fetched from an external API using a custom Django management command:
 
-Code
+Code: 
+
 python manage.py fetch_data
 
 Running this command updates the database with new MTG releases (e.g., Universes Beyond sets like Spider‑Man or TMNT).
@@ -84,7 +85,8 @@ Architecture Summary
 This structure is intentionally modular and ready for additional TCGs.
 
 🚀 Running the Project
-Code
+Code:
+
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
