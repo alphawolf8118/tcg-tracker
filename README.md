@@ -63,7 +63,6 @@ A UI button for triggering updates is planned for a future release.
 
 🏗️ Project Structure
 
-Code:
 ```
 tcg_tracker/
 │
