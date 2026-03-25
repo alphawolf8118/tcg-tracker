@@ -1,4 +1,11 @@
 📘 TCG Tracker (Django)
+
+![Screenshot](screenshots/TCG-Tracker-MTG-Main.png)
+
+![Screenshot](screenshots/TCG-Tracker-MTG-Set.png)
+
+![Screenshot](screenshots/TCG-Tracker-Pokemon.png)
+
 A Django-based collection tracker for Magic: The Gathering and Pokémon, with planned support for Lorcana and Riftbound.
 Built as a self‑learning project and designed so multiple users (including my kids) can maintain their own collections independently.
 
