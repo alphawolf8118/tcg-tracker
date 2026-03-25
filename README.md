@@ -62,7 +62,8 @@ A UI button for triggering updates is planned for a future release.
 - Owned / missing
 
 🏗️ Project Structure
-Code
+Code:
+```
 tcg_tracker/
 │
 ├── accounts/          # login, signup, authentication
@@ -76,6 +77,7 @@ tcg_tracker/
 │
 ├── manage.py
 └── LICENSE
+```
 
 Architecture Summary
 - games/ → global catalog data
